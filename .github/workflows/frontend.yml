@@ -1,0 +1,27 @@
+name: Frontend (Flarum)
+
+# O mesmo workflow que o core e a FoF usam (flarum/framework
+# REUSABLE_frontend.yml): Prettier, TypeScript e o build de produção. No push
+# do main ele commita o js/dist gerado.
+on: [workflow_dispatch, push, pull_request]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: frontend-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  run:
+    # Fixado por SHA, como as outras actions do repositório (2.x).
+    uses: flarum/framework/.github/workflows/REUSABLE_frontend.yml@cdc86216fced7409f218f38808b7fd3fc7882b17  # 2.x
+    with:
+      enable_bundlewatch: false
+      enable_prettier: true
+      enable_typescript: true
+      js_package_manager: npm
+      frontend_directory: ./js
+      main_git_branch: main
+      # Sem o typescript-coverage-report nas dependências.
+      type_coverage_script: ''

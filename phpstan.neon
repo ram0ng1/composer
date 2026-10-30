@@ -1,0 +1,13 @@
+includes:
+    - vendor/flarum/phpstan/extension.neon
+
+parameters:
+    level: 6
+    paths:
+        - extend.php
+        - tests
+    excludePaths:
+        analyse:
+            - tests/integration/tmp (?)
+            # O script de setup roda a instalação ao ser carregado.
+            - tests/integration/setup.php

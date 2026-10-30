@@ -1,0 +1,13 @@
+ramon-composer:
+  admin:
+    settings:
+      preview_default_visible_label: Mostrar a prévia por padrão
+      preview_default_visible_help: No computador, o post aparece formatado à direita do editor enquanto se escreve. Cada pessoa pode esconder ou mostrar a prévia pelo botão no canto do composer; a escolha fica guardada no navegador.
+      hide_core_preview_label: Esconder a prévia do Flarum no tópico
+      hide_core_preview_help: Enquanto a prévia lado a lado está aberta, o post esmaecido que o Flarum mostra no tópico (a resposta sendo escrita, ou o post sendo editado) não aparece, e o post continua com o texto publicado. No celular e no tablet, ou com a prévia lado a lado escondida, a prévia do Flarum continua.
+
+  forum:
+    preview:
+      label: Prévia do post
+      show_tooltip: Mostrar prévia
+      hide_tooltip: Esconder prévia
