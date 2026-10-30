@@ -1,0 +1,13 @@
+ramon-composer:
+  admin:
+    settings:
+      preview_default_visible_label: Show the preview by default
+      preview_default_visible_help: On desktop, the formatted post appears to the right of the editor while writing. Each user can hide or show it with the button in the composer corner; their choice is remembered in the browser.
+      hide_core_preview_label: Hide Flarum's preview in the discussion
+      hide_core_preview_help: While the side-by-side preview is open, the faded post that Flarum shows in the discussion (the reply being written, or the post being edited) is not shown, and the post keeps its published text. On phones and tablets, or with the side-by-side preview hidden, Flarum's preview stays.
+
+  forum:
+    preview:
+      label: Post preview
+      show_tooltip: Show preview
+      hide_tooltip: Hide preview
