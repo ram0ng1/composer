@@ -73,9 +73,11 @@
             "title": "Composer Preview",
             "category": "feature",
             "icon": {
-                "name": "fas fa-table-columns",
-                "backgroundColor": "#4D698E",
-                "color": "#fff"
+                "image": "icon.svg",
+                "backgroundColor": "#fff",
+                "backgroundSize": "58%",
+                "backgroundPosition": "center",
+                "backgroundRepeat": "no-repeat"
             }
         },
         "flarum-cli": {
