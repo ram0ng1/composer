@@ -28,6 +28,8 @@ return [
     (new Extend\Settings())
         ->default('ramon-composer.preview_default_visible', true)
         ->default('ramon-composer.hide_core_preview', false)
+        ->default('ramon-composer.mobile_preview', true)
         ->serializeToForum('ramonComposerPreviewDefaultVisible', 'ramon-composer.preview_default_visible', 'boolval')
-        ->serializeToForum('ramonComposerHideCorePreview', 'ramon-composer.hide_core_preview', 'boolval'),
+        ->serializeToForum('ramonComposerHideCorePreview', 'ramon-composer.hide_core_preview', 'boolval')
+        ->serializeToForum('ramonComposerMobilePreview', 'ramon-composer.mobile_preview', 'boolval'),
 ];

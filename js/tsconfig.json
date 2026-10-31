@@ -6,7 +6,6 @@
   "compilerOptions": {
     "rootDir": "./src",
     "declarationDir": "./dist-typings",
-    "baseUrl": ".",
     "moduleResolution": "bundler",
     "paths": {
       "flarum/*": ["../vendor/flarum/core/js/dist-typings/*", "../../../vendor/flarum/core/js/dist-typings/*"]
