@@ -34,6 +34,55 @@
   }
 }
 
+// Celular e tablet: a prévia no lugar do editor, na largura toda. Os dois
+// ocupam a mesma célula da grade: a área de texto fica invisível, mas mantém a
+// altura que o core calcula, e a prévia a cobre. A barra de formatação sai,
+// porque escreveria no texto escondido.
+.ComposerBody-editor.ComposerPreview-full {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto;
+
+  > .TextEditor {
+    display: contents;
+  }
+
+  .TextEditor-editorContainer {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+    visibility: hidden;
+  }
+
+  .TextEditor-controls {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .TextEditor-toolbar {
+    display: none;
+  }
+
+  .ComposerPreview {
+    grid-column: 1;
+    grid-row: 1;
+    border-left: 0;
+  }
+
+  .ComposerPreview-scroll {
+    padding: 0 0 10px;
+  }
+}
+
+// No celular o core deixa o composer com 350px, para caber o teclado. Na
+// prévia não há teclado: o composer usa a tela toda, e o core recalcula a
+// altura do texto (e da prévia junto) a partir dela.
+@media @phone {
+  .Composer.Composer--fullPreview:not(.minimized) {
+    height: 100% !important;
+  }
+}
+
 // A prévia não dá altura à linha: a caixa rolável é absoluta e acompanha a
 // altura da área de texto, que é a que o core calcula a cada redesenho.
 .ComposerPreview {

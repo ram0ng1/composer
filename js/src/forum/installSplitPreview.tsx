@@ -54,6 +54,32 @@ export function splitVisible(composer?: ComposerState): boolean {
 }
 
 /**
+ * No celular e no tablet não cabem as duas colunas: um botão no rodapé troca
+ * o editor pela prévia, na largura e na altura toda do texto. A troca vale só
+ * para o composer em que foi feita (o `body` dele), e fechar ou abrir outro
+ * volta ao editor.
+ */
+let fullPreviewBody: unknown = null;
+
+// A prévia do tablet abre na tela cheia do core; "Escrever" só sai dela se
+// foi a prévia que entrou.
+let enteredFullScreen = false;
+
+export function fullPreviewPossible(composer: ComposerState = app.composer): boolean {
+  const screen = app.screen();
+
+  if (screen !== 'phone' && screen !== 'tablet') return false;
+  if (app.forum.attribute('ramonComposerMobilePreview') === false) return false;
+  if (composer !== app.composer || !composer.isVisible() || canelaPreviewOn()) return false;
+
+  return composer.position === 'normal' || composer.position === 'fullScreen';
+}
+
+export function fullPreviewVisible(composer?: ComposerState): boolean {
+  return fullPreviewPossible(composer) && fullPreviewBody !== null && fullPreviewBody === app.composer.body;
+}
+
+/**
  * Se a prévia do core no tópico (o post esmaecido da resposta ou da edição)
  * sai: só com a opção do admin e enquanto a prévia ao lado está aberta. No
  * celular e no tablet, ou com a prévia ao lado escondida, ela continua.
@@ -98,8 +124,48 @@ function toggleButton(): Mithril.Children {
   );
 }
 
+function fullPreviewButton(): Mithril.Children {
+  const visible = fullPreviewVisible();
+
+  return (
+    <Button
+      className={`Button ComposerPreview-fullToggle${visible ? ' active' : ''}`}
+      icon={visible ? 'fas fa-pen' : 'far fa-eye'}
+      aria-pressed={visible ? 'true' : 'false'}
+      onclick={() => {
+        const composer = app.composer;
+
+        fullPreviewBody = visible ? null : composer.body;
+
+        if (!visible && app.screen() === 'tablet' && composer.position === 'normal') {
+          composer.fullScreen();
+          enteredFullScreen = true;
+        } else if (visible && enteredFullScreen) {
+          if (composer.position === 'fullScreen') composer.exitFullScreen();
+          enteredFullScreen = false;
+        }
+      }}
+    >
+      {app.translator.trans(visible ? 'ramon-composer.forum.preview.write_button' : 'ramon-composer.forum.preview.preview_button')}
+    </Button>
+  );
+}
+
+function previewColumn(composer: ComposerState): Mithril.Children {
+  const ComposerPostPreview = flarum.reg.get('core', 'forum/components/ComposerPostPreview');
+
+  return (
+    <div className="ComposerPreview" aria-label={app.translator.trans('ramon-composer.forum.preview.label', {}, true)}>
+      <div className="ComposerPreview-scroll">
+        <ComposerPostPreview className="Post-body ComposerPreview-body" composer={composer} />
+      </div>
+    </div>
+  );
+}
+
 // O que a última view do ComposerBody desenhou (ver o `resize` abaixo).
 let renderedSplit = false;
+let renderedFull = false;
 
 export default function installSplitPreview() {
   // A prévia entra ao lado do editor, dentro de `.ComposerBody-editor`.
@@ -107,33 +173,30 @@ export default function installSplitPreview() {
   // outras extensões põem nela).
   extend(COMPOSER_BODY as any, 'view', function (this: any, vdom: Mithril.Children) {
     renderedSplit = splitVisible(this.composer);
+    renderedFull = fullPreviewVisible(this.composer);
 
-    if (!renderedSplit) return;
+    if (!renderedSplit && !renderedFull) return;
 
     const editor = findByClass(vdom, 'ComposerBody-editor');
 
     if (!editor || !Array.isArray(editor.children)) return;
 
-    editor.attrs.className = `${editor.attrs.className} ComposerPreview-split`;
-
-    const ComposerPostPreview = flarum.reg.get('core', 'forum/components/ComposerPostPreview');
+    editor.attrs.className = `${editor.attrs.className} ${renderedSplit ? 'ComposerPreview-split' : 'ComposerPreview-full'}`;
 
     // Sem `key`: o TextEditor, irmão dela, não tem, e o Mithril recusa uma
     // lista que mistura nós com e sem chave. Entrando sempre por último, a
-    // posição do editor não muda e ele não é recriado.
-    editor.children.push(
-      <div className="ComposerPreview" aria-label={app.translator.trans('ramon-composer.forum.preview.label', {}, true)}>
-        <div className="ComposerPreview-scroll">
-          <ComposerPostPreview className="Post-body ComposerPreview-body" composer={this.composer} />
-        </div>
-      </div>
-    );
+    // posição do editor não muda e ele não é recriado (o texto e o cursor
+    // continuam lá quando a pessoa volta a escrever).
+    editor.children.push(previewColumn(this.composer));
   });
 
   // A classe na raiz deixa o CSS alargar o composer (na tela cheia e na
-  // página do tópico) para as duas colunas.
+  // página do tópico) para as duas colunas, e no celular usar a altura toda.
   extend(COMPOSER as any, 'view', function (vdom: any) {
-    if (vdom?.attrs && splitVisible()) vdom.attrs.className = `${vdom.attrs.className || ''} Composer--splitPreview`;
+    if (!vdom?.attrs) return;
+
+    if (splitVisible()) vdom.attrs.className = `${vdom.attrs.className || ''} Composer--splitPreview`;
+    else if (fullPreviewVisible()) vdom.attrs.className = `${vdom.attrs.className || ''} Composer--fullPreview`;
   });
 
   // O botão vem antes de minimizar e tela cheia.
@@ -146,7 +209,16 @@ export default function installSplitPreview() {
   extend(TextEditor.prototype, 'controlItems', function (this: TextEditor, items: ItemList<Mithril.Children>) {
     const composer = (this.attrs as any)?.composer as ComposerState | undefined;
 
-    if (composer && items.has('preview') && splitVisible(composer)) items.remove('preview');
+    if (!composer) return;
+
+    if (items.has('preview') && splitVisible(composer)) items.remove('preview');
+
+    // No celular e no tablet o botão "Prévia" toma o lugar do "olho" do core.
+    if (fullPreviewPossible(composer)) {
+      if (items.has('preview')) items.remove('preview');
+
+      items.add('ramonComposerPreview', fullPreviewButton(), -5);
+    }
   });
 
   // A resposta em andamento no fim do tópico: o placeholder volta a ser o
@@ -174,6 +246,6 @@ export default function installSplitPreview() {
   // `app.screen()` muda ao redimensionar a janela sem que nada redesenhe: a
   // coluna da prévia ficaria aberta num composer estreito (ou não voltaria).
   window.addEventListener('resize', () => {
-    if (app.composer?.isVisible() && splitVisible() !== renderedSplit) m.redraw();
+    if (app.composer?.isVisible() && (splitVisible() !== renderedSplit || fullPreviewVisible() !== renderedFull)) m.redraw();
   });
 }

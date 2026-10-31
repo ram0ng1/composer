@@ -14,5 +14,11 @@ export default [
       type: 'boolean',
       label: app.translator.trans('ramon-composer.admin.settings.hide_core_preview_label'),
       help: app.translator.trans('ramon-composer.admin.settings.hide_core_preview_help'),
+    }))
+    .setting(() => ({
+      setting: 'ramon-composer.mobile_preview',
+      type: 'boolean',
+      label: app.translator.trans('ramon-composer.admin.settings.mobile_preview_label'),
+      help: app.translator.trans('ramon-composer.admin.settings.mobile_preview_help'),
     })),
 ];

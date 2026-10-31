@@ -45,6 +45,7 @@ class ForumAttributesTest extends TestCase
 
         $this->assertTrue($attributes['ramonComposerPreviewDefaultVisible']);
         $this->assertFalse($attributes['ramonComposerHideCorePreview']);
+        $this->assertTrue($attributes['ramonComposerMobilePreview']);
     }
 
     #[Test]
@@ -52,11 +53,13 @@ class ForumAttributesTest extends TestCase
     {
         $this->setting('ramon-composer.preview_default_visible', '0');
         $this->setting('ramon-composer.hide_core_preview', '1');
+        $this->setting('ramon-composer.mobile_preview', '0');
 
         $attributes = $this->forumAttributes();
 
         $this->assertFalse($attributes['ramonComposerPreviewDefaultVisible']);
         $this->assertTrue($attributes['ramonComposerHideCorePreview']);
+        $this->assertFalse($attributes['ramonComposerMobilePreview']);
     }
 
     #[Test]
